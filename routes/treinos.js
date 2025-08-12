@@ -140,7 +140,7 @@ const { exercicios, configuracoesTreino, configuracoesTreinoIMC, duracoesTreino,
  */
 router.post('/gerar', (req, res) => {
   try {
-    const { nomeUsuario, objetivo, nivel } = req.body;
+    const { nomeUsuario, objetivo, nivel, duracao } = req.body;
 
     // Validação dos parâmetros obrigatórios
     if (!nomeUsuario || !objetivo || !nivel) {
@@ -173,7 +173,7 @@ router.post('/gerar', (req, res) => {
     }
 
     // Gerar treino personalizado
-    const treino = gerarTreinoPersonalizado(nomeUsuario.trim(), objetivo, nivel);
+    const treino = gerarTreinoPersonalizado(nomeUsuario.trim(), objetivo, nivel, duracao);
 
     res.json({
       success: true,
@@ -378,9 +378,9 @@ router.get('/configuracoes', (req, res) => {
 });
 
 // Função para gerar treino personalizado
-function gerarTreinoPersonalizado(nomeUsuario, objetivo, nivel) {
+function gerarTreinoPersonalizado(nomeUsuario, objetivo, nivel, duracaoParam) {
   const config = configuracoesTreino[objetivo];
-  const duracao = duracoesTreino[nivel];
+  const duracao = duracaoParam || duracoesTreino[nivel];
   
   const treino = {
     id: `treino_${Date.now()}`,
@@ -620,4 +620,4 @@ function gerarExerciciosRecomendados(imc, idade) {
   return exercicios;
 }
 
-module.exports = router; 
+module.exports = router;

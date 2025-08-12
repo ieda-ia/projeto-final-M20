@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Treinos Personalizados</title>
+    
+    <!-- MaterializeCSS CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <!-- MaterializeCSS Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav style="background-color: #5c7aea;">
+        <div class="nav-wrapper container">
+            <a href="#" class="brand-logo">
+                <i class="material-icons left">fitness_center</i>
+                Gerador de Treinos
+            </a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <li><a href="#gerador-treino" class="nav-link">Gerador de Treino</a></li>
+                <li><a href="#calculadora-imc" class="nav-link">Calculadora IMC</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Hero Section -->
+        <section id="hero-section" class="section">
+            <div class="row">
+                <div class="col s12 center-align">
+                    <h1 style="color: #5c7aea; font-size: 2.2rem; text-align: center;">
+                        <i class="material-icons medium">fitness_center</i>
+                        Gerador de Treinos Personalizados
+                    </h1>
+                    <p class="flow-text" style="color: #7b8ab8;">
+                        Crie treinos personalizados baseados em seus objetivos e calcule seu IMC para receber recomendações específicas
+                    </p>
+                    <div class="row">
+                        <div class="col s12 m6">
+                            <a href="#gerador-treino" class="btn-large waves-effect waves-light nav-link" style="background-color: #a0c4ff !important; color: #2b4570 !important;">
+                                <i class="material-icons left">add_circle</i>
+                                Gerar Treino
+                            </a>
+                        </div>
+                        <div class="col s12 m6">
+                            <a href="#calculadora-imc" class="btn-large waves-effect waves-light nav-link" style="background-color: #c1d3fe !important; color: #2b4570 !important;">
+                                <i class="material-icons left">calculate</i>
+                                Calcular IMC
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gerador de Treino Section -->
+        <section id="gerador-treino" class="section">
+            <div class="row">
+                <div class="col s12">
+                    <h2 style="color: #5c7aea; font-size: 1.8rem; text-align: center;">
+                        <i class="material-icons small">fitness_center</i>
+                        Gerador de Treino Personalizado
+                    </h2>
+                    
+                    <!-- Formulário do Gerador de Treino -->
+                    <form id="geradorTreinoForm" class="col s12">
+                        <div class="row">
+                            <div class="input-field col s12 m12">
+                                <input id="nomeUsuarioInput" type="text" name="nomeUsuario" required>
+                                <label for="nomeUsuarioInput">Seu Nome</label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col s12 m4">
+                                <label for="objetivoSelect" class="select-label">Objetivo do Treino</label>
+                                <select id="objetivoSelect" name="objetivo" required class="browser-default">
+                                    <option value="" disabled selected>Escolha o objetivo</option>
+                                    <option value="emagrecer">Emagrecer</option>
+                                    <option value="ganharMassa">Ganhar Massa</option>
+                                    <option value="condicionamento">Melhorar Condicionamento</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col s12 m4">
+                                <label for="nivelSelect" class="select-label">Nível de Dificuldade</label>
+                                <select id="nivelSelect" name="nivel" required class="browser-default">
+                                    <option value="" disabled selected>Escolha o nível</option>
+                                    <option value="iniciante">Iniciante</option>
+                                    <option value="intermediario">Intermediário</option>
+                                    <option value="avancado">Avançado</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col s12 m4">
+                                <label for="duracaoSelect" class="select-label">Duração do Treino</label>
+                                <select id="duracaoSelect" name="duracao" required class="browser-default">
+                                    <option value="" disabled selected>Escolha a duração</option>
+                                    <option value="30">30 minutos</option>
+                                    <option value="45">45 minutos</option>
+                                    <option value="60">60 minutos</option>
+                                    <option value="90">90 minutos</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col s12 center-align">
+                                <button type="submit" id="gerarTreinoButton" class="btn-large waves-effect waves-light" style="background-color: #a0c4ff !important; color: #2b4570 !important;">
+                                    <i class="material-icons left">play_arrow</i>
+                                    Gerar Treino
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <!-- Resultado do Treino -->
+                    <div id="resultadoTreino" class="col s12" style="display: none;">
+                        <div class="card-panel" style="background-color: #f0f5ff;">
+                            <h4 id="tituloTreino" style="color: #5c7aea; font-size: 1.5rem; text-align: center;"></h4>
+                            <div id="listaExercicios"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Loading -->
+                    <div id="loadingTreino" class="col s12 center-align" style="display: none;">
+                        <div class="preloader-wrapper big active">
+                            <div class="spinner-layer" style="border-color: #a0c4ff;">
+                                <div class="circle-clipper left">
+                                    <div class="circle"></div>
+                                </div>
+                                <div class="circle-clipper right">
+                                    <div class="circle"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <p>Gerando seu treino personalizado...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Calculadora IMC Section -->
+        <section id="calculadora-imc" class="section">
+            <div class="row">
+                <div class="col s12">
+                    <h2 style="color: #5c7aea; font-size: 1.8rem; text-align: center;">
+                        <i class="material-icons small">calculate</i>
+                        Calculadora de IMC e Recomendações
+                    </h2>
+                    
+                    <!-- Formulário da Calculadora IMC -->
+                    <form id="calculadoraIMCForm" class="col s12">
+                        <div class="row">
+                            <div class="input-field col s12 m3">
+                                <input id="pesoInput" type="number" name="peso" step="0.1" min="20" max="300" required>
+                                <label for="pesoInput">Peso (kg)</label>
+                            </div>
+                            
+                            <div class="input-field col s12 m3">
+                                <input id="alturaInput" type="number" name="altura" step="0.01" min="0.5" max="3.0" required>
+                                <label for="alturaInput">Altura (m)</label>
+                            </div>
+                            
+                            <div class="input-field col s12 m3">
+                                <input id="idadeInput" type="number" name="idade" min="10" max="100" required>
+                                <label for="idadeInput">Idade (anos)</label>
+                            </div>
+                            
+                            <div class="input-field col s12 m3">
+                                <input id="nomeInput" type="text" name="nome" maxlength="50">
+                                <label for="nomeInput">Nome (opcional)</label>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col s12 center-align">
+                                <button type="submit" id="calcularIMCButton" class="btn-large waves-effect waves-light" style="background-color: #c1d3fe !important; color: #2b4570 !important;">
+                                    <i class="material-icons left">calculate</i>
+                                    Calcular IMC
+                                </button>
+                                
+                                <button type="button" id="gerarTreinoIMCButton" class="btn-large waves-effect waves-light" style="display: none; background-color: #a0c4ff !important; color: #2b4570 !important;">
+                                    <i class="material-icons left">fitness_center</i>
+                                    Gerar Treino Personalizado
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <!-- Resultado do IMC -->
+                    <div id="resultadoIMC" class="col s12" style="display: none;">
+                        <div class="card-panel" style="background-color: #f0f5ff;">
+                            <h4 id="tituloIMC" style="color: #5c7aea; font-size: 1.5rem; text-align: center;"></h4>
+                            <div id="dadosIMC"></div>
+                            <div id="recomendacoesIMC"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Treino baseado no IMC -->
+                    <div id="treinoIMC" class="col s12" style="display: none;">
+                        <div class="card-panel" style="background-color: #f0f5ff;">
+                            <h4 id="tituloTreinoIMC" style="color: #5c7aea; font-size: 1.5rem; text-align: center;"></h4>
+                            <div id="listaExerciciosIMC"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Loading -->
+                    <div id="loadingIMC" class="col s12 center-align" style="display: none;">
+                        <div class="preloader-wrapper big active">
+                            <div class="spinner-layer" style="border-color: #c1d3fe;">
+                                <div class="circle-clipper left">
+                                    <div class="circle"></div>
+                                </div>
+                                <div class="circle-clipper right">
+                                    <div class="circle"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <p>Calculando seu IMC...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="page-footer" style="background-color: #5c7aea;">
+        <div class="container">
+            <div class="row">
+                <div class="col s12 center-align">
+                    <p class="white-text">
+                        <i class="material-icons tiny">fitness_center</i>
+                        Gerador de Treinos Personalizados - API de Fitness
+                    </p>                
+                </div>
+                <div class="col s12 center-align">
+                    <p class="white-text">
+                        <i class="material-icons tiny">fitness_center</i>
+                        Created by - Ieda Flock - 2025
+                    </p>
+                </div>
+            </div>            
+        </div>
+    </footer>
+ 
+     <!-- jQuery (necessário para o Materialize) -->
+     <script src="jquery-3.6.0.min.js"></script>
+     <!-- MaterializeCSS JavaScript -->
+     <script src="materialize.min.js"></script>
+     <!-- Configurações -->
+     <script src="config.js"></script>
+     <!-- Custom JavaScript -->
+     <script src="script.js"></script>
+    <!-- Inicialização dos componentes do Materialize -->
+    <script>
+        // Inicializar os componentes do Materialize quando o documento estiver pronto
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar selects
+            var selects = document.querySelectorAll('select');
+            if (selects.length > 0) {
+                M.FormSelect.init(selects);
+                console.log('✅ Selects inicializados:', selects.length);
+                
+                // Verificar se os selects foram inicializados corretamente
+                selects.forEach(function(select) {
+                    console.log('Select inicializado:', select.id);
+                });
+            }
+            
+            // Inicializar tooltips (se houver)
+            var tooltips = document.querySelectorAll('.tooltipped');
+            if (tooltips.length > 0) {
+                M.Tooltip.init(tooltips);
+                console.log('✅ Tooltips inicializados:', tooltips.length);
+            }
+            
+            console.log('✅ Componentes MaterializeCSS inicializados com DOMContentLoaded');
+        });
+    </script>
+</body>
+</html>
