@@ -382,4 +382,4 @@ Para dúvidas sobre a implementação ou funcionalidades:
 
 ---
 
-**🏋️‍♂️ Divirta-se testando e desenvolvendo com esta API atualizada! 💪** 
+**🏋️‍♂️ Divirta-se testando e desenvolvendo com esta API atualizada! 💪**

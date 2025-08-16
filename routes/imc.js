@@ -8,14 +8,13 @@ const router = express.Router();
  *     CalculoIMCRequest:
  *       type: object
  *       required:
- *         - nomeUsuario
  *         - peso
  *         - altura
  *         - idade
  *       properties:
  *         nomeUsuario:
  *           type: string
- *           description: Nome do usuário (obrigatório)
+ *           description: Nome do usuário (obrigatório apenas se gerarTreino for true)
  *           minLength: 2
  *           maxLength: 50
  *         peso:
@@ -109,81 +108,58 @@ const router = express.Router();
  *         description: Erro interno do servidor
  */
 router.post('/calcular', (req, res) => {
-  try {
-    const { nomeUsuario, peso, altura, idade, gerarTreino = false } = req.body;
+  const { nomeUsuario, peso, altura, idade, gerarTreino } = req.body;
 
-    // Validação dos parâmetros obrigatórios
-    if (!nomeUsuario || !peso || !altura || !idade) {
-      return res.status(400).json({
-        error: '❌ Parâmetros obrigatórios',
-        message: 'Nome do usuário, peso, altura e idade são obrigatórios'
-      });
-    }
-
-    // Validação do nome do usuário
-    if (typeof nomeUsuario !== 'string' || nomeUsuario.trim().length < 2 || nomeUsuario.trim().length > 50) {
-      return res.status(400).json({
-        error: '❌ Nome do usuário inválido',
-        message: 'Nome deve ter entre 2 e 50 caracteres'
-      });
-    }
-
-    if (peso < 20 || peso > 300) {
-      return res.status(400).json({
-        error: '❌ Peso inválido',
-        message: 'Peso deve estar entre 20 e 300 kg'
-      });
-    }
-
-    if (altura < 0.5 || altura > 3.0) {
-      return res.status(400).json({
-        error: '❌ Altura inválida',
-        message: 'Altura deve estar entre 0.5 e 3.0 metros'
-      });
-    }
-
-    if (idade < 10 || idade > 100) {
-      return res.status(400).json({
-        error: '❌ Idade inválida',
-        message: 'Idade deve estar entre 10 e 100 anos'
-      });
-    }
-
-    // Calcular IMC
-    const imc = calcularIMC(peso, altura);
-    const classificacao = classificarIMC(imc);
-    const status = determinarStatus(imc, idade);
-    const recomendacoes = gerarRecomendacoes(imc, idade);
-    const exerciciosRecomendados = gerarExerciciosRecomendados(imc, idade);
-
-    const resultado = {
-      imc: Math.round(imc * 100) / 100,
-      classificacao,
-      status,
-      recomendacoes,
-      exerciciosRecomendados,
-      treinoPersonalizado: null
-    };
-
-    // Gerar treino personalizado se solicitado
-    if (gerarTreino) {
-      const treino = gerarTreinoPorIMC(nomeUsuario.trim(), classificacao, idade);
-      resultado.treinoPersonalizado = treino;
-    }
-
-    res.json({
-      success: true,
-      message: `📊 IMC calculado com sucesso para ${nomeUsuario.trim()}!`,
-      resultado
-    });
-
-  } catch (error) {
-    console.error('Erro ao calcular IMC:', error);
-    res.status(500).json({
-      error: '❌ Erro interno do servidor',
-      message: 'Não foi possível calcular o IMC'
+  // Validação dos campos obrigatórios
+  if (!peso || !altura || !idade) {
+    return res.status(400).json({
+      success: false,
+      message: 'Peso, altura e idade são obrigatórios.'
     });
   }
+
+  // Calcule o IMC e a classificação ANTES de usar em qualquer bloco
+  const imc = calcularIMC(peso, altura);
+  const classificacao = classificarIMC(imc);
+  const status = determinarStatus(imc, idade);
+  const recomendacoes = gerarRecomendacoes(imc, idade);
+
+  const resultadoIMC = {
+    imc: Math.round(imc * 100) / 100,
+    classificacao,
+    status,
+    recomendacoes
+  };
+
+  // Se gerarTreino for true, nomeUsuario é obrigatório
+  if (gerarTreino === true) {
+    if (
+      !nomeUsuario ||
+      typeof nomeUsuario !== 'string' ||
+      nomeUsuario.trim().length < 2 ||
+      nomeUsuario.trim().length > 50
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: 'Nome do usuário é obrigatório para gerar treino personalizado e deve ter entre 2 e 50 caracteres.'
+      });
+    }
+    // Use a função correta para gerar treino por IMC
+    const treino = gerarTreinoPorIMC(nomeUsuario.trim(), classificacao, idade);
+    return res.json({
+      success: true,
+      message: `🎯 IMC calculado e treino personalizado gerado para ${nomeUsuario.trim()}!`,
+      resultadoIMC,
+      treino
+    });
+  }
+
+  // Caso contrário, retorna só o cálculo do IMC e recomendações
+  return res.json({
+    success: true,
+    message: '✅ IMC calculado com sucesso!',
+    resultadoIMC
+  });
 });
 
 /**
@@ -473,4 +449,64 @@ function selecionarExerciciosAleatorios(categoria, nivel, quantidade) {
   return exerciciosSelecionados;
 }
 
-module.exports = router; 
+// Função para lidar com o cálculo do IMC no frontend
+async function handleCalcularIMC(event) {
+  event.preventDefault();
+
+  // Obtenha os valores do formulário
+  const peso = parseFloat(document.getElementById('peso').value);
+  const altura = parseFloat(document.getElementById('altura').value);
+  const idade = parseInt(document.getElementById('idade').value);
+  const gerarTreino = document.getElementById('gerarTreino').checked; // Supondo um checkbox
+  const nomeUsuario = document.getElementById('nomeUsuario').value;
+
+  // Validação básica
+  if (!peso || !altura || !idade) {
+    showError('Preencha peso, altura e idade.');
+    return;
+  }
+
+  // Monta o corpo da requisição
+  const body = {
+    peso,
+    altura,
+    idade
+  };
+  if (gerarTreino) {
+    body.gerarTreino = true;
+    if (nomeUsuario && nomeUsuario.trim().length > 0) {
+      body.nomeUsuario = nomeUsuario.trim();
+    } else {
+      showError('Informe o nome para gerar treino personalizado.');
+      return;
+    }
+  }
+
+  // Envia a requisição
+  try {
+    const response = await fetch('/api/imc/calcular', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+      showError(data.message || 'Erro ao calcular IMC.');
+      return;
+    }
+
+    // Exibe resultado IMC
+    displayIMCResult(data.resultadoIMC);
+
+    // Se veio treino, exibe também
+    if (data.treino) {
+      displayTreinoIMC(data.treino, body.nomeUsuario);
+    }
+
+  } catch (err) {
+    showError('Erro de conexão com a API.');
+  }
+}
+
+module.exports = router;
