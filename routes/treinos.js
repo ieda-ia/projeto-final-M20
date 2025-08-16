@@ -86,14 +86,13 @@ const { exercicios, configuracoesTreino, configuracoesTreinoIMC, duracoesTreino,
  *     GerarTreinoIMCRequest:
  *       type: object
  *       required:
- *         - nomeUsuario
  *         - peso
  *         - altura
  *         - idade
  *       properties:
  *         nomeUsuario:
  *           type: string
- *           description: Nome do usuário (obrigatório)
+ *           description: Nome do usuário (opcional)
  *           minLength: 2
  *           maxLength: 50
  *         peso:
@@ -195,7 +194,7 @@ router.post('/gerar', (req, res) => {
  * /api/treinos/gerar-por-imc:
  *   post:
  *     summary: Gera um treino personalizado baseado no IMC
- *     description: Calcula o IMC e gera um treino personalizado baseado no resultado, exigindo o nome do usuário
+ *     description: Calcula o IMC e gera um treino personalizado baseado no resultado. O nome do usuário é opcional.
  *     tags: [Treinos]
  *     requestBody:
  *       required: true
@@ -225,47 +224,26 @@ router.post('/gerar', (req, res) => {
  *         description: Erro interno do servidor
  */
 router.post('/gerar-por-imc', (req, res) => {
+  const { nomeUsuario, peso, altura, idade } = req.body;
+
+  // Só valida peso, altura e idade
+  if (!peso || !altura || !idade) {
+    return res.status(400).json({
+      success: false,
+      message: 'Peso, altura e idade são obrigatórios.'
+    });
+  }
+
+  const body = {
+    peso,
+    altura,
+    idade
+  };
+  if (nomeUsuario && nomeUsuario.trim().length > 0) {
+    body.nomeUsuario = nomeUsuario.trim();
+  }
+
   try {
-    const { nomeUsuario, peso, altura, idade } = req.body;
-
-    // Validação dos parâmetros obrigatórios
-    if (!nomeUsuario || !peso || !altura || !idade) {
-      return res.status(400).json({
-        error: '❌ Parâmetros obrigatórios',
-        message: 'Nome do usuário, peso, altura e idade são obrigatórios'
-      });
-    }
-
-    // Validação do nome do usuário
-    if (typeof nomeUsuario !== 'string' || nomeUsuario.trim().length < 2 || nomeUsuario.trim().length > 50) {
-      return res.status(400).json({
-        error: '❌ Nome do usuário inválido',
-        message: 'Nome deve ter entre 2 e 50 caracteres'
-      });
-    }
-
-    // Validações do IMC
-    if (peso < 20 || peso > 300) {
-      return res.status(400).json({
-        error: '❌ Peso inválido',
-        message: 'Peso deve estar entre 20 e 300 kg'
-      });
-    }
-
-    if (altura < 0.5 || altura > 3.0) {
-      return res.status(400).json({
-        error: '❌ Altura inválida',
-        message: 'Altura deve estar entre 0.5 e 3.0 metros'
-      });
-    }
-
-    if (idade < 10 || idade > 100) {
-      return res.status(400).json({
-        error: '❌ Idade inválida',
-        message: 'Idade deve estar entre 10 e 100 anos'
-      });
-    }
-
     // Calcular IMC
     const imc = calcularIMC(peso, altura);
     const classificacao = classificarIMC(imc);
@@ -274,7 +252,7 @@ router.post('/gerar-por-imc', (req, res) => {
     const exerciciosRecomendados = gerarExerciciosRecomendados(imc, idade);
 
     // Gerar treino baseado no IMC
-    const treino = gerarTreinoPorIMC(nomeUsuario.trim(), classificacao, idade);
+    const treino = gerarTreinoPorIMC(nomeUsuario?.trim(), classificacao, idade);
 
     const resultadoIMC = {
       imc: Math.round(imc * 100) / 100,
@@ -286,7 +264,9 @@ router.post('/gerar-por-imc', (req, res) => {
 
     res.json({
       success: true,
-      message: `🎯 Treino baseado no IMC gerado com sucesso para ${nomeUsuario.trim()}!`,
+      message: nomeUsuario
+        ? `🎯 Treino baseado no IMC gerado com sucesso para ${nomeUsuario.trim()}!`
+        : `🎯 Treino baseado no IMC gerado com sucesso!`,
       resultadoIMC,
       treino
     });
@@ -465,9 +445,9 @@ function gerarTreinoPorIMC(nomeUsuario, classificacaoIMC, idade) {
   const numExerciciosFlex = Math.max(1, Math.floor(config.flexibilidade * 2));
   const exerciciosFlex = selecionarExerciciosAleatorios('flexibilidade', config.nivel, numExerciciosFlex);
   treino.exercicios.push({
-    categoria: 'Flexibilidade',
-    duracao: duracao.flexibilidade,
-    exercicios: exerciciosFlex
+      categoria: 'Flexibilidade',
+      duracao: duracao.flexibilidade,
+      exercicios: exerciciosFlex
   });
 
   return treino;

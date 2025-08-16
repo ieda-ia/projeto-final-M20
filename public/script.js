@@ -142,72 +142,63 @@ async function handleGerarTreino(event) {
  */
 async function handleCalcularIMC(event) {
     event.preventDefault();
-    
+
     // Obter dados do formulário
     const formData = new FormData(event.target);
     const peso = parseFloat(formData.get('peso'));
     const altura = parseFloat(formData.get('altura'));
     const idade = parseInt(formData.get('idade'));
-    const nome = formData.get('nome') || 'Usuário';
-    
+    const nome = formData.get('nome'); // Não obrigatório
+
     // Validar dados
     if (!peso || !altura || !idade) {
         showError('Por favor, preencha todos os campos obrigatórios.');
         return;
     }
-    
-    if (peso < CONFIG.VALIDATION.PESO.MIN || peso > CONFIG.VALIDATION.PESO.MAX) {
-        showError(`Peso deve estar entre ${CONFIG.VALIDATION.PESO.MIN} e ${CONFIG.VALIDATION.PESO.MAX} kg.`);
-        return;
-    }
-    
-    if (altura < CONFIG.VALIDATION.ALTURA.MIN || altura > CONFIG.VALIDATION.ALTURA.MAX) {
-        showError(`Altura deve estar entre ${CONFIG.VALIDATION.ALTURA.MIN} e ${CONFIG.VALIDATION.ALTURA.MAX} metros.`);
-        return;
-    }
-    
-    if (idade < CONFIG.VALIDATION.IDADE.MIN || idade > CONFIG.VALIDATION.IDADE.MAX) {
-        showError(`Idade deve estar entre ${CONFIG.VALIDATION.IDADE.MIN} e ${CONFIG.VALIDATION.IDADE.MAX} anos.`);
-        return;
-    }
-    
+
     // Mostrar loading
     showLoading('imc');
-    
+
     try {
+        // Montar body da requisição
+        const body = {
+            peso: peso,
+            altura: altura,
+            idade: idade
+        };
+        // Só envia nomeUsuario se estiver preenchido
+        if (nome && nome.trim().length > 0) {
+            body.nomeUsuario = nome.trim();
+        }
+
         // Fazer requisição para a API
         const response = await fetch(`${API_BASE_URL}/imc/calcular`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                nomeUsuario: nome,
-                peso: peso,
-                altura: altura,
-                idade: idade,
-                gerarTreino: false // Primeiro só calcular o IMC
-            })
+            body: JSON.stringify(body)
         });
-        
-        if (!response.ok) {
-            throw new Error(`Erro na API: ${response.status}`);
-        }
-        
+
         const resultado = await response.json();
-        
+
+        if (!response.ok) {
+            showError(resultado.message || 'Erro ao calcular IMC.');
+            return;
+        }
+
         // Exibir resultado do IMC
         displayIMCResult(resultado);
-        
+
         // Mostrar botão para gerar treino personalizado
         showGerarTreinoIMCButton();
-        
+
         // Scroll para o resultado
         document.getElementById('resultadoIMC').scrollIntoView({
             behavior: CONFIG.UI.SCROLL_BEHAVIOR,
             block: 'start'
         });
-        
+
     } catch (error) {
         console.error('❌ Erro ao calcular IMC:', error);
         showError(`Erro ao calcular IMC: ${error.message}`);
@@ -224,17 +215,23 @@ async function handleGerarTreinoIMC() {
     const peso = parseFloat(document.getElementById('pesoInput').value);
     const altura = parseFloat(document.getElementById('alturaInput').value);
     const idade = parseInt(document.getElementById('idadeInput').value);
-    const nome = document.getElementById('nomeInput').value || 'Usuário';
-    
+    const nome = document.getElementById('nomeInput').value;
+
     // Validar dados
     if (!peso || !altura || !idade) {
-        showError('Por favor, preencha todos os campos obrigatórios.');
+        showError('Por favor, preencha peso, altura e idade.');
         return;
     }
-    
+    // Só exige nome se for gerar treino personalizado
+    // Aqui, como a função é para gerar treino, mantenha a validação:
+    if (!nome || nome.trim().length < 2) {
+        showError('Informe o nome para gerar treino personalizado.');
+        return;
+    }
+
     // Mostrar loading
     showLoading('imc');
-    
+
     try {
         // Fazer requisição para a API com geração de treino
         const response = await fetch(`${API_BASE_URL}/imc/calcular`, {
@@ -243,43 +240,79 @@ async function handleGerarTreinoIMC() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                nomeUsuario: nome,
+                nomeUsuario: nome.trim(),
                 peso: peso,
                 altura: altura,
                 idade: idade,
                 gerarTreino: true // Gerar treino personalizado
             })
         });
-        
-        if (!response.ok) {
-            throw new Error(`Erro na API: ${response.status}`);
-        }
-        
+
         const resultado = await response.json();
-        console.log('Resposta da API (treino IMC):', resultado);
-        
-        // Verificar se o resultado está na estrutura correta
-        const dadosResultado = resultado.resultado || resultado;
-        
+
+        if (!response.ok) {
+            showError(resultado.message || 'Erro ao gerar treino.');
+            return;
+        }
+
         // Exibir treino personalizado
-        if (dadosResultado.treinoPersonalizado) {
-            displayTreinoIMC(dadosResultado.treinoPersonalizado, nome);
-            
-            // Scroll para o treino
+        if (resultado.treino) {
+            displayTreinoIMC(resultado.treino, nome.trim());
             document.getElementById('treinoIMC').scrollIntoView({
                 behavior: CONFIG.UI.SCROLL_BEHAVIOR,
                 block: 'start'
             });
         } else {
-            console.error('❌ Treino personalizado não encontrado na resposta:', dadosResultado);
             showError('Não foi possível gerar o treino personalizado. Tente novamente.');
         }
-        
+
     } catch (error) {
         console.error('❌ Erro ao gerar treino baseado no IMC:', error);
         showError(`Erro ao gerar treino: ${error.message}`);
     } finally {
         hideLoading('imc');
+    }
+}
+
+/**
+ * Manipula a geração de treino por IMC
+ * @param {Event} event - Evento de submit do formulário
+ */
+async function handleGerarTreinoPorIMC(event) {
+    event.preventDefault();
+
+    const formData = new FormData(event.target);
+    const peso = parseFloat(formData.get('peso'));
+    const altura = parseFloat(formData.get('altura'));
+    const idade = parseInt(formData.get('idade'));
+    const nomeUsuario = formData.get('nomeUsuario'); // opcional
+
+    if (!peso || !altura || !idade) {
+        showError('Preencha peso, altura e idade.');
+        return;
+    }
+
+    const body = {
+        peso,
+        altura,
+        idade
+    };
+    if (nomeUsuario) body.nomeUsuario = nomeUsuario;
+
+    try {
+        const response = await fetch('/api/treinos/gerar-por-imc', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            showError(data.message || 'Erro ao gerar treino.');
+            return;
+        }
+        // ...exibir resultado...
+    } catch (err) {
+        showError('Erro de conexão com a API.');
     }
 }
 
@@ -348,21 +381,21 @@ function displayIMCResult(resultado) {
     const tituloIMC = document.getElementById('tituloIMC');
     const dadosIMC = document.getElementById('dadosIMC');
     const recomendacoesIMC = document.getElementById('recomendacoesIMC');
-    
+
     // Log para debug
     console.log('Dados do IMC recebidos:', resultado);
-    
-    // Verificar se o resultado está na estrutura correta
-    const dadosIMCObj = resultado.resultado || resultado;
-    
+
+    // Corrigido: pega resultadoIMC se existir, senão usa o próprio resultado
+    const dadosIMCObj = resultado.resultadoIMC || resultado;
+
     // Verificar se temos um nome de usuário
     const nomeUsuario = resultado.nomeUsuario || dadosIMCObj.nomeUsuario || 'Usuário';
-    
+
     // Configurar título
     tituloIMC.textContent = `Resultado do IMC para ${nomeUsuario}`;
-    
+
     // Exibir dados do IMC
-    if (dadosIMCObj && dadosIMCObj.imc !== undefined) {
+    if (dadosIMCObj && typeof dadosIMCObj.imc !== 'undefined') {
         dadosIMC.innerHTML = `
             <div class="imc-resultado">
                 <h2 class="imc-valor">${dadosIMCObj.imc.toFixed(1)}</h2>
@@ -370,7 +403,7 @@ function displayIMCResult(resultado) {
                 <p class="imc-status">${dadosIMCObj.status}</p>
             </div>
         `;
-        
+
         // Exibir recomendações
         if (dadosIMCObj.recomendacoes && Array.isArray(dadosIMCObj.recomendacoes)) {
             recomendacoesIMC.innerHTML = `
@@ -382,11 +415,11 @@ function displayIMCResult(resultado) {
                 </div>
             `;
         }
-        
+
         // Mostrar resultado
         resultadoIMC.style.display = 'block';
         resultadoIMC.classList.add('fade-in-up');
-        
+
         console.log('✅ Resultado do IMC exibido com sucesso');
     } else {
         console.error('❌ Dados de IMC inválidos:', dadosIMCObj);
@@ -624,6 +657,7 @@ window.GeradorTreinos = {
     handleGerarTreino,
     handleCalcularIMC,
     handleGerarTreinoIMC,
+    handleGerarTreinoPorIMC,
     showError,
     showSuccess
 };
