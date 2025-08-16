@@ -14,6 +14,60 @@ document.addEventListener('DOMContentLoaded', function() {
     // Configurar navegação suave
     setupSmoothNavigation();
     
+    // Inicializa os tooltips do Materialize
+    var tooltips = document.querySelectorAll('.tooltipped');
+    M.Tooltip.init(tooltips);
+
+    // Inicializa o botão flutuante do Materialize
+    var elemsFAB = document.querySelectorAll('.fixed-action-btn');
+    M.FloatingActionButton.init(elemsFAB);
+
+    // Inicializa a modal do Materialize
+    var elemsModal = document.querySelectorAll('.modal');
+    M.Modal.init(elemsModal);
+
+    // Botão: Listar Exercícios
+    document.getElementById('btn-listar-exercicios').addEventListener('click', async function() {
+        try {
+            const res = await fetch(`${API_BASE_URL}/treinos/exercicios`);
+            const data = await res.json();
+            abrirModalResultados(
+                'Exercícios Existentes',
+                `<pre>${JSON.stringify(data, null, 2)}</pre>`
+            );
+        } catch (err) {
+            abrirModalResultados('Erro', '<span class="red-text">Erro ao listar exercícios.</span>');
+        }
+    });
+
+    // Botão: Listar Classificações IMC
+    document.getElementById('btn-listar-classificacoes').addEventListener('click', async function() {
+        try {
+            const res = await fetch(`${API_BASE_URL}/imc/classificacoes`);
+            const data = await res.json();
+            abrirModalResultados(
+                'Classificações de IMC',
+                `<pre>${JSON.stringify(data.classificacoes, null, 2)}</pre>`
+            );
+        } catch (err) {
+            abrirModalResultados('Erro', '<span class="red-text">Erro ao listar classificações.</span>');
+        }
+    });
+
+    // Botão: Listar Configurações Níveis de Treino
+    document.getElementById('btn-listar-configuracoes').addEventListener('click', async function() {
+        try {
+            const res = await fetch(`${API_BASE_URL}/treinos/configuracoes`);
+            const data = await res.json();
+            abrirModalResultados(
+                'Configurações dos Níveis de Treino',
+                `<pre>${JSON.stringify(data, null, 2)}</pre>`
+            );
+        } catch (err) {
+            abrirModalResultados('Erro', '<span class="red-text">Erro ao listar configurações.</span>');
+        }
+    });
+
     console.log('🚀 SPA Gerador de Treinos inicializada com sucesso!');
     console.log('📡 Conectando com API em:', API_BASE_URL);
 });
@@ -650,6 +704,19 @@ function removeSuccessMessages() {
             msg.parentNode.removeChild(msg);
         }
     });
+}
+
+/**
+ * Abre a modal de resultados com título e conteúdo fornecidos
+ * @param {string} titulo - Título da modal
+ * @param {string} conteudoHTML - Conteúdo HTML a ser exibido na modal
+ */
+function abrirModalResultados(titulo, conteudoHTML) {
+    document.getElementById('modalTitulo').textContent = titulo;
+    document.getElementById('modalConteudo').innerHTML = conteudoHTML;
+    var modalElem = document.getElementById('modalResultados');
+    var instance = M.Modal.getInstance(modalElem);
+    instance.open();
 }
 
 // Exportar funções para uso global (se necessário)
