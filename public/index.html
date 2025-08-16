@@ -230,6 +230,46 @@
         </section>
     </main>
 
+    <!-- Floating Action Button -->
+    <div class="fixed-action-btn">
+        <a class="btn-floating btn-large blue">
+            <i class="material-icons">menu</i>
+        </a>
+        <ul>
+            <li>
+                <a id="btn-listar-exercicios" class="btn-floating green tooltipped" data-tooltip="Exercícios">
+                    <i class="material-icons">fitness_center</i>
+                </a>
+            </li>
+            <li>
+                <a id="btn-listar-classificacoes" class="btn-floating orange tooltipped" data-tooltip="Classificações IMC">
+                    <i class="material-icons">assignment</i>
+                </a>
+            </li>
+            <li>
+                <a id="btn-listar-configuracoes" class="btn-floating purple tooltipped" data-tooltip="Configurações Níveis">
+                    <i class="material-icons">settings</i>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Áreas para exibir os resultados -->
+    <div id="resultadoExercicios" style="display:none"></div>
+    <div id="resultadoClassificacoes" style="display:none"></div>
+    <div id="resultadoConfiguracoes" style="display:none"></div>
+
+    <!-- Modal Resultados -->
+    <div id="modalResultados" class="modal">
+        <div class="modal-content">
+            <h4 id="modalTitulo"></h4>
+            <div id="modalConteudo"></div>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-close btn-flat">Fechar</a>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="page-footer" style="background-color: #5c7aea;">
         <div class="container">
