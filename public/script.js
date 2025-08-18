@@ -224,8 +224,8 @@ async function handleCalcularIMC(event) {
     const nome = formData.get('nome'); // Não obrigatório
 
     // Validar dados
-    if (!peso || !altura || !idade) {
-        showError('Por favor, preencha todos os campos obrigatórios.');
+    if (isNaN(peso) || isNaN(altura) || isNaN(idade) || peso <= 0 || altura <= 0 || idade <= 0) {
+        M.toast({ html: 'Por favor, preencha todos os campos obrigatórios com valores numéricos válidos e maiores que zero.', classes: 'red darken-3' });
         return;
     }
 
