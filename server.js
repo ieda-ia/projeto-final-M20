@@ -11,7 +11,15 @@ const PORT = process.env.PORT || 3006;
 // Middleware
 app.use(helmet());
 app.use(cors());
+
 app.use(express.json());
+
+
+
+
+
+
+
 
 // Servir arquivos estáticos da pasta public
 app.use(express.static(path.join(__dirname, 'public')));
@@ -103,4 +111,4 @@ app.listen(PORT, () => {
   console.log(`🌐 Frontend disponível em: http://localhost:${PORT}`);
 });
 
-module.exports = app; 
+module.exports = app;

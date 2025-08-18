@@ -82,7 +82,11 @@ const { exercicios, configuracoesTreino, configuracoesTreinoIMC, duracoesTreino,
  *           type: string
  *           enum: [iniciante, intermediario, avancado]
  *           description: Nível do usuário
- *     
+ *         duracao:
+ *           type: number
+ *           description: Duração desejada do treino em minutos (opcional)
+ *           nullable: true
+     
  *     GerarTreinoIMCRequest:
  *       type: object
  *       required:
@@ -168,6 +172,13 @@ router.post('/gerar', (req, res) => {
       return res.status(400).json({
         error: '❌ Nível inválido',
         message: 'Nível deve ser: iniciante, intermediario ou avancado'
+      });
+    }
+
+    if (duracao !== undefined && duracao !== null && duracao !== '' && ![30, 45, 60, 90].includes(Number(duracao))) {
+      return res.status(400).json({
+        error: '❌ Duração inválida',
+        message: 'Duração deve ser: 30, 45, 60 ou 90'
       });
     }
 

@@ -133,31 +133,50 @@ async function handleGerarTreino(event) {
     const nomeUsuario = formData.get('nomeUsuario');
     const objetivo = formData.get('objetivo');
     const nivel = formData.get('nivel');
-    const duracao = formData.get('duracao');
-    
-    // Validar dados
-    if (!nomeUsuario || !objetivo || !nivel || !duracao) {
-        showError('Por favor, preencha todos os campos obrigatórios.');
-        return;
-    }
-    
-    // Mostrar loading
-    showLoading('treino');
+      const duracaoInput = document.getElementById('duracaoSelect');
+      const duracao = duracaoInput.value === '' ? '' : parseInt(duracaoInput.value);
+
+     // Validar dados
+     if (!nomeUsuario || !objetivo || !nivel || duracao === '') {
+         return M.toast({ html: 'Por favor, preencha todos os campos obrigatórios: Nome, Objetivo, Nível e Duração.', classes: 'red darken-3' });
+     }
+
+     // Only validate if duracao is not null and not a valid number
+     if (duracao !== null && isNaN(duracao)) {
+         return M.toast({ html: 'Por favor, insira uma duração válida.', classes: 'red darken-3' });
+     }
+
+      const requestBody = { nomeUsuario, objetivo, nivel, duracao }; // Request body constructed
+
+
+
+         // Validar dados adicionais, se necessário
+     // if (!algumCampoAdicional) {
+     //     showError('Por favor, preencha o campo adicional.');
+     //     return;
+     // }
+
+     // Mostrar loading
+     showLoading('treino');
     
     try {
         // Fazer requisição para a API
+        
+
+        
+
+
+
+
+
         const response = await fetch(`${API_BASE_URL}/treinos/gerar`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                nomeUsuario: nomeUsuario,
-                objetivo: objetivo,
-                nivel: nivel,
-                duracao: duracao
-            })
+            body: JSON.stringify(requestBody)
         });
+
         
         if (!response.ok) {
             throw new Error(`Erro na API: ${response.status}`);
@@ -183,7 +202,7 @@ async function handleGerarTreino(event) {
         });
         
     } catch (error) {
-        console.error('❌ Erro ao gerar treino:', error);
+        console.error('❌ Erro ao gerar treino (frontend):', error);
         showError(`Erro ao gerar treino: ${error.message}`);
     } finally {
         hideLoading('treino');
