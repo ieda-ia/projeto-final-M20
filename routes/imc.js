@@ -110,11 +110,16 @@ const router = express.Router();
 router.post('/calcular', (req, res) => {
   const { nomeUsuario, peso, altura, idade, gerarTreino } = req.body;
 
-  // Validação dos campos obrigatórios
-  if (!peso || !altura || !idade) {
+  // Validação dos campos obrigatórios e tipo
+  const missingFields = [];
+  if (!peso || isNaN(peso)) missingFields.push('peso');
+  if (!altura || isNaN(altura)) missingFields.push('altura');
+  if (!idade || isNaN(idade)) missingFields.push('idade');
+
+  if (missingFields.length > 0) {
     return res.status(400).json({
-      success: false,
-      message: 'Peso, altura e idade são obrigatórios.'
+      error: '❌ Erro de validação',
+      message: `Os seguintes campos são obrigatórios ou inválidos: ${missingFields.join(', ')}.`
     });
   }
 

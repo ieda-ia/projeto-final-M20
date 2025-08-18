@@ -82,7 +82,18 @@ app.get('/api', (req, res) => {
   });
 });
 
-// Middleware de tratamento de erros
+// Middleware de tratamento de erros de JSON
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    return res.status(400).json({
+      error: '❌ Erro de requisição',
+      message: 'O corpo da requisição não é um JSON válido ou contém dados inválidos/ausentes.'
+    });
+  }
+  next(err);
+});
+
+// Middleware de tratamento de erros geral
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
