@@ -10,3 +10,7 @@ screenshots/
 cypress/screenshots/ 
 #Planejamento_testes/
 routes/treinos copy.txt
+# Environment variables
+.env
+# Fixtures
+fixtures/postIMC.json
