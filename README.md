@@ -2,7 +2,21 @@
 
 > **Sistema completo com API REST para geração de treinos personalizados e frontend SPA integrado**
 
+## 📋 Acesse o Wiki para verificar os Casos de Testes e relação de Defeitos encontrados
+
 ## 📋 Descrição do Projeto
+
+### 🎯 Requisitos
+| **ID**  | **Título do Requisito**              | **Descrição do Requisito**                                                                                                                       |
+|---------|--------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
+| RF01    | Personalizado                        | O usuário deverá informar o nome para poder criar um treino personalizado e preencher os campos obrigatórios                                     |
+| RF02    | Gerar cálculo de IMC                 | O usuário deverá informar os dados obrigatórios para o cálculo do IMC                                                                            |
+| RF03    | Gerar treino com base no IMC         | Após o usuário realizar o cálculo do IMC, poderá gerar um treino baseado nesse resultado                                                         |
+| RF04    | Listar exercícios                    | A API deve retornar todos os exercícios existentes                                                                                               |
+| RF05    | Listar classificação IMC             | A API deve retornar todas as classificações existentes de IMC                                                                                    |
+| RF06    | Nível de treinos                     | A API deve apresentar as configurações existentes para cada nível e objetivo de treino.                                                          |
+
+
 
 Este projeto oferece uma solução completa para otimizar sua jornada de saúde e bem-estar, incluindo:
 
